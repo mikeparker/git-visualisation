@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitVisualisationCore", "GitVisualisationCore\GitVisualisationCore.csproj", "{ECE17BD3-92C7-48DD-A875-F43EF1F6D07D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitVisualisationCore.Tests", "GitVisualisationCore.Tests\GitVisualisationCore.Tests.csproj", "{D9C905AA-AA8A-466A-83E2-A04BB1048151}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ECE17BD3-92C7-48DD-A875-F43EF1F6D07D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECE17BD3-92C7-48DD-A875-F43EF1F6D07D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECE17BD3-92C7-48DD-A875-F43EF1F6D07D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECE17BD3-92C7-48DD-A875-F43EF1F6D07D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9C905AA-AA8A-466A-83E2-A04BB1048151}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9C905AA-AA8A-466A-83E2-A04BB1048151}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9C905AA-AA8A-466A-83E2-A04BB1048151}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9C905AA-AA8A-466A-83E2-A04BB1048151}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
