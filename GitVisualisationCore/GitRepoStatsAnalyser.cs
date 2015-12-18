@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using LibGit2Sharp;
@@ -21,38 +22,82 @@ namespace GitVisualisationCore
 
         public IEnumerable<FileStats> GetAllCSharpFilePathsAsObjects()
         {
-            var repo = new Repository(@"C:\git\git-visualisation\.git");
-            foreach (string f in GetAllCSharpFilePaths())
+            var fileStatsByFilepath = new FileStatsCollection();
+//            using (var repo = new Repository(@"C:\git\git-visualisation\.git"))
+            using (var repo = new Repository(@"C:\Git\michaelparker-mi-6\.git"))
             {
-//                var filter = new CommitFilter { Since = repo.Branches["master"], Until = repo.Branches["development"] };
-//                var commits = repo.Commits.QueryBy(filter).ToList();
-                var commits = repo.Commits.ToList();
+                var commit1 = repo.Head.Tip;
+                for (int i = 0; i < 100; i++)
+                {
+                    var secondCommit = commit1.Parents.FirstOrDefault();
+                    if (secondCommit == null)
+                    {
+                        break;
+                    }
 
-                yield return new FileStats(f, commits.Count);
+                    Tree commitTree = commit1.Tree;
+                    Tree parentCommitTree = secondCommit.Tree;
+
+                    var patch = repo.Diff.Compare<Patch>(parentCommitTree, commitTree);
+                    
+                    Console.WriteLine("Commit."); // Status -> File Path
+                    foreach (var ptc in patch)
+                    {
+                        fileStatsByFilepath.AddCommit(ptc);
+                        Console.WriteLine(ptc.Status +" -> "+ptc.Path); // Status -> File Path
+                    }
+
+                    commit1 = secondCommit;
+                }
+            }
+
+            return fileStatsByFilepath.GetValues();
+        }
+    }
+
+    public class FileStatsCollection
+    {
+        private readonly Dictionary<string, FileStats> fileStatsByFilepath = new Dictionary<string, FileStats>();
+
+        public void AddCommit(PatchEntryChanges ptc)
+        {
+            FileStats x;
+            if (fileStatsByFilepath.TryGetValue(ptc.Path, out x))
+            {
+                x.AddCommit(ptc);
+            }
+            else
+            {
+                fileStatsByFilepath[ptc.Path] = new FileStats(ptc.Path);
             }
         }
 
-        public void GetSomething()
+        public IEnumerable<FileStats> GetValues()
         {
-            DirectoryInfo DirInfo = new DirectoryInfo(baseFilePath);
+            return fileStatsByFilepath.Values.ToList();
         }
     }
 
     public class FileStats
     {
         private readonly string filepath;
-        private readonly int numberOfCommitsInLast5Years;
+        private int numberOfCommits;
 
-        public FileStats(string filepath, int numberOfCommitsInLast5Years)
+        public FileStats(string filepath)
         {
             this.filepath = filepath;
-            this.numberOfCommitsInLast5Years = numberOfCommitsInLast5Years;
+            numberOfCommits = 1;
         }
 
 
         public override string ToString()
         {
-            return filepath + " " + numberOfCommitsInLast5Years;
+            return filepath + " " + numberOfCommits;
+        }
+
+        public void AddCommit(PatchEntryChanges ptc)
+        {
+            numberOfCommits++;
         }
     }
 }
