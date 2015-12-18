@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using LibGit2Sharp;
 
 namespace GitVisualisationCore
@@ -27,7 +28,7 @@ namespace GitVisualisationCore
             using (var repo = new Repository(@"C:\Git\michaelparker-mi-6\.git"))
             {
                 var commit1 = repo.Head.Tip;
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < 1000; i++)
                 {
                     var secondCommit = commit1.Parents.FirstOrDefault();
                     if (secondCommit == null)
@@ -40,10 +41,11 @@ namespace GitVisualisationCore
 
                     var patch = repo.Diff.Compare<Patch>(parentCommitTree, commitTree);
                     
-                    Console.WriteLine("Commit."); // Status -> File Path
+                    Console.WriteLine("Commit: " + commit1.Message); // Status -> File Path
+                    Match match = Regex.Match(commit1.Message, @"MI-\d+", RegexOptions.IgnoreCase);
                     foreach (var ptc in patch)
                     {
-                        fileStatsByFilepath.AddCommit(ptc);
+                        fileStatsByFilepath.AddCommit(ptc, commit1, match);
                         Console.WriteLine(ptc.Status +" -> "+ptc.Path); // Status -> File Path
                     }
 
@@ -59,22 +61,24 @@ namespace GitVisualisationCore
     {
         private readonly Dictionary<string, FileStats> fileStatsByFilepath = new Dictionary<string, FileStats>();
 
-        public void AddCommit(PatchEntryChanges ptc)
+        public void AddCommit(PatchEntryChanges ptc, Commit commit1, Match match)
         {
-            FileStats x;
-            if (fileStatsByFilepath.TryGetValue(ptc.Path, out x))
+            FileStats fileStats;
+            if (fileStatsByFilepath.TryGetValue(ptc.Path, out fileStats))
             {
-                x.AddCommit(ptc);
             }
             else
             {
-                fileStatsByFilepath[ptc.Path] = new FileStats(ptc.Path);
+                fileStats = new FileStats(ptc.Path);
+                fileStatsByFilepath[ptc.Path] = fileStats;
             }
+
+            fileStats.AddCommit(ptc, commit1, match);
         }
 
         public IEnumerable<FileStats> GetValues()
         {
-            return fileStatsByFilepath.Values.ToList();
+            return fileStatsByFilepath.Values.OrderBy(v => v.NumberOfCommits).ToList();
         }
     }
 
@@ -82,22 +86,38 @@ namespace GitVisualisationCore
     {
         private readonly string filepath;
         private int numberOfCommits;
+        private readonly HashSet<string> bugsFixedInThisPath = new HashSet<string>(); 
 
         public FileStats(string filepath)
         {
             this.filepath = filepath;
-            numberOfCommits = 1;
+            numberOfCommits = 0;
+        }
+
+        public int NumberOfCommits
+        {
+            get { return numberOfCommits; }
         }
 
 
         public override string ToString()
         {
-            return filepath + " " + numberOfCommits;
+            return filepath + " " + NumberOfCommits + " " + string.Join(", ", bugsFixedInThisPath);
         }
 
-        public void AddCommit(PatchEntryChanges ptc)
+        public void AddCommit(PatchEntryChanges ptc, Commit commit1, Match match)
         {
-            numberOfCommits++;
+            numberOfCommits = NumberOfCommits + 1;
+            if (!match.Success)
+            {
+                return;
+            }
+
+            foreach (var @group in match.Groups)
+            {
+                var bugNumber = @group.ToString();
+                bugsFixedInThisPath.Add(bugNumber.ToUpper());
+            }
         }
     }
 }
