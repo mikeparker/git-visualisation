@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using NUnit.Framework;
 
 namespace GitVisualisationCore.Tests
@@ -21,9 +20,16 @@ namespace GitVisualisationCore.Tests
         }
 
         [Test]
-        public void TestNothing()
+        public void TestCollectingCurrentFilesAsObjects()
         {
-            Assert.That(8, Is.EqualTo(6+2));
+            var sut = new GitRepoStatsAnalyser(@"C:\git\git-visualisation\");
+
+            var allCSharpFilePaths = sut.GetAllCSharpFilePathsAsObjects();
+
+            foreach (var file in allCSharpFilePaths)
+            {
+                Debug.WriteLine(file);
+            }
         }
     }
 }
