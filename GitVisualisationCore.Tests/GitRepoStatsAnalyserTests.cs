@@ -30,6 +30,8 @@ namespace GitVisualisationCore.Tests
             {
                 Debug.WriteLine(file);
             }
+
+            // test
         }
     }
 }
