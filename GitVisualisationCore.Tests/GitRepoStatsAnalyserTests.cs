@@ -33,5 +33,21 @@ namespace GitVisualisationCore.Tests
 
             // test
         }
+
+        [Test]
+        public void TestFilepaths()
+        {
+            var sut = new GitRepoStatsAnalyser(@"C:\git\git-visualisation\");
+
+            var allCSharpFilePaths = sut.GetAllCSharpFilePathsAsObjects();
+
+            foreach (var file in allCSharpFilePaths)
+            {
+                file.
+                Debug.WriteLine(file);
+            }
+
+            // test
+        }
     }
 }

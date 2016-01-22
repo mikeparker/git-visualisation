@@ -41,12 +41,12 @@ namespace GitVisualisationCore
 
                     var patch = repo.Diff.Compare<Patch>(parentCommitTree, commitTree);
                     
-                    Console.WriteLine("Commit: " + commit1.Message); // Status -> File Path
+//                    Console.WriteLine("Commit: " + commit1.Message); // Status -> File Path
                     Match match = Regex.Match(commit1.Message, @"MI-\d+", RegexOptions.IgnoreCase);
                     foreach (var ptc in patch)
                     {
                         fileStatsByFilepath.AddCommit(ptc, commit1, match);
-                        Console.WriteLine(ptc.Status +" -> "+ptc.Path); // Status -> File Path
+//                        Console.WriteLine(ptc.Status +" -> "+ptc.Path); // Status -> File Path
                     }
 
                     commit1 = secondCommit;
@@ -80,44 +80,21 @@ namespace GitVisualisationCore
         {
             return fileStatsByFilepath.Values.OrderBy(v => v.NumberOfCommits).ToList();
         }
+
+        public FileNode GetRootNode()
+        {
+            var x = FileNode.Create(fileStatsByFilepath);
+            return x;
+        }
     }
 
-    public class FileStats
+    public class FileNode
     {
-        private readonly string filepath;
-        private int numberOfCommits;
-        private readonly HashSet<string> bugsFixedInThisPath = new HashSet<string>(); 
-
-        public FileStats(string filepath)
+        private Dictionary<string, List<FileNode>> childrenByCommonPrefix = new Dictionary<string, List<FileNode>>(); 
+        public static FileNode Create(Dictionary<string, FileStats> fileStatsByFilepath)
         {
-            this.filepath = filepath;
-            numberOfCommits = 0;
-        }
-
-        public int NumberOfCommits
-        {
-            get { return numberOfCommits; }
-        }
-
-
-        public override string ToString()
-        {
-            return filepath + " " + NumberOfCommits + " " + string.Join(", ", bugsFixedInThisPath);
-        }
-
-        public void AddCommit(PatchEntryChanges ptc, Commit commit1, Match match)
-        {
-            numberOfCommits = NumberOfCommits + 1;
-            if (!match.Success)
-            {
-                return;
-            }
-
-            foreach (var @group in match.Groups)
-            {
-                var bugNumber = @group.ToString();
-                bugsFixedInThisPath.Add(bugNumber.ToUpper());
-            }
+            var allPaths = fileStatsByFilepath.Keys;
+            var allRootFolders = allPaths.Select(k => k.Split('\\').First()).First();
         }
     }
 }
